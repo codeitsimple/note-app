@@ -51,7 +51,7 @@ const NoteForm = observer( ({store}: props ) => {
       <Form onSubmit={handleSubmit} autoComplete='off'>
         <FormField>
           <label>Title</label>
-          <Form.Input  placeholder='Title' value={note.title}  name='title' onChange={handleInputChange}/>
+          <Form.Input  placeholder='Title' value={note.title}  name='title' onChange={handleInputChange} required={true}/>
         </FormField>
         <FormField>
           <label>Detail</label>
@@ -72,7 +72,7 @@ const NoteForm = observer( ({store}: props ) => {
               ]}
             />
           </div>
-          <Form.TextArea placeholder='Description' value={note.description}  name='description' onChange={handleInputChange}/>
+          <Form.TextArea placeholder='Description' value={note.description}  name='description' onChange={handleInputChange} required={true}/>
 
           <Button loading={submitting}  floated="right" positive type="submit" content='Submit' onClick={ () => createOrEdit}/>
           <Button  floated="right" type="button" content='Cancel' onClick={closeForm}/>
