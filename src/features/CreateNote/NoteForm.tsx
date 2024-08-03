@@ -51,7 +51,7 @@ const NoteForm = observer( ({store, editing}: props ) => {
     setSubmitFlag(true);
     store.createNote(note);
     setNote(initialState);
-   // setSubmitFlag(false);
+    setSubmitFlag(false);
     
   }
 
