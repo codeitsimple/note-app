@@ -1,4 +1,5 @@
 import React from "react";
+import "./NotesList.css";
 
 import {
     FeedEvent,
@@ -7,38 +8,57 @@ import {
     Card,
     Feed,
     Container,
-    Button
+    Button,
+    FeedSummary,
+    FeedContent,
+    FeedDate,
+    FeedExtra,
+    Segment,
+    Loader,
+    Image
 } from "semantic-ui-react";
-import { noteStore } from "../../api/NotesStore";
+import { NotesStore, noteStore } from "../../api/NotesStore";
 import { Note } from "../../model/notesModel";
 import { observer } from "mobx-react";
-
-const NotesList  = observer(() => {
+interface props {
+    store: NotesStore
+};
+const NotesList  = observer(({store}: props) => {
 
     return (
-        <Container fluid>
+        <Container fluid id="note-list-container">
             <Card  fluid >
                 <CardContent>
                 <CardHeader>Recent Notes {  } </CardHeader>
                 </CardContent>
+                
                 <CardContent>
-                    <Feed>
-                        {
-                            noteStore.notesList.map( (note: Note) => 
-                                <FeedEvent
-                                    icon='sticky note'
-                                    date={note.title}
-                                    summary={note.description} key={note.id}
-                                    >
-                                        
-                                        <Button type="button" icon="pencil" circular={true} onClick={ () => noteStore.setEditing(note) }></Button>
-
+                {
+                    store.loading && <Segment>
+                        <Loader disabled />
+                        <Image src='https://react.semantic-ui.com/images/wireframe/short-paragraph.png' />
+                    </Segment>
+                }
+                        <Feed>
+                            {
+                                noteStore.notesList.map( (note: Note) => 
+                                    <FeedEvent icon='sticky note' key={note.id}>
+                                        <FeedContent>
+                                            <FeedSummary>
+                                            {note.title}
+                                            <FeedDate>3 days ago</FeedDate>
+                                            </FeedSummary>
+                                            <FeedExtra text>
+                                            <div  className={note.weight + "-note " + note.align + "-note note-container" } >{note.description} </div>
+                                            </FeedExtra>
+                                        </FeedContent>
+                                        <Button type="button" icon="pencil" circular={true} onClick={ () => noteStore.setEditing(note) } 
+                                                        active={note.id === noteStore.selectedNote.id}></Button>
                                     </FeedEvent>
-
-                            
                                 )
-                        }
-                    </Feed>
+                            }
+                        </Feed>
+                        
                 </CardContent>
             </Card>
         </Container>

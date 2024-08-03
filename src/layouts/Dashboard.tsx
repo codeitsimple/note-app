@@ -15,16 +15,16 @@ const Dashboard  = () => {
             <Grid stackable columns={3} divided>
                 <GridRow>
                     <GridColumn  width={4} >
-                        <Folders/>
+                        <Folders  store={noteStore}/>
                     </GridColumn>
                     <GridColumn width={12}>
                             <Grid stackable columns={2} >
                             <GridRow>
                                 <GridColumn width={8}>
-                                    <NotesList/>
+                                    <NotesList  store={noteStore}/>
                                 </GridColumn>
                                 <GridColumn width={7}>
-                                    <NoteForm store={noteStore}/>
+                                    <NoteForm store={noteStore} editing={noteStore.editing}/>
                                 </GridColumn>
                             </GridRow>
                         </Grid>    

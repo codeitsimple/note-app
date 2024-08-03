@@ -36,6 +36,8 @@ const LoginForm = observer(() => {
                     }
                 );
 
+            
+        }).then( ()=>{
             navigate("/home");
         })
         .catch((error:any) => {

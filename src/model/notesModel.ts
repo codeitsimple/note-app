@@ -3,7 +3,9 @@ export type Note =  {
     id: string,
     title: string,
     description: string,
-    date: string
+    date: string,
+    align?: string,
+    weight?:  string
 }; 
 
 

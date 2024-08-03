@@ -1,0 +1,26 @@
+    .note-container{
+        padding-right:16px;
+    }
+
+    .bold-note{
+        font-weight: bold;
+    }
+    .italic-note{
+        font-style: italic;
+    }
+    .underline-note{
+        text-decoration: underline;
+    }
+
+
+    .left-note{
+        text-align: left;
+    }
+    .right-note{
+        text-align: right;
+    }
+    .justify-note{
+        text-align: justify;
+    }
+
+

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { useState } from "react";
 import { 
     CardHeader,
     CardContent,
@@ -12,13 +12,18 @@ import {
     List,
     Container,
     Button,
+    Segment,
+    Loader,
+    Image,
 } from "semantic-ui-react";
 import { observer } from "mobx-react";
 import FolderForm from "./FolderForm";
-import { noteStore } from "../../api/NotesStore";
+import { NotesStore } from "../../api/NotesStore";
 
-
-const Folders  =  observer(() => {
+interface props {
+    store: NotesStore
+};
+const Folders  =  observer( ({store}: props ) => {
 
     const [newfolderFlag, setNewFolderFlag] =  useState(false);
     const openOrCloseForm = () => {
@@ -26,13 +31,22 @@ const Folders  =  observer(() => {
     };
     
     return (
+        <>
+        
         <Container>
             <Card fluid >
                 <CardContent>
                 <CardHeader>Folders</CardHeader>
                 </CardContent>
                 <CardContent>
-                <List>
+                {
+                store.loading && <Segment>
+                        <Loader disabled />
+                        <Image src='https://react.semantic-ui.com/images/wireframe/short-paragraph.png' />
+                    </Segment>
+                }
+                {
+                !store.loading && <List>
                     <ListItem>
                         <ListIcon name='folder' />
                         <ListContent>
@@ -41,8 +55,8 @@ const Folders  =  observer(() => {
                             <ListList>
 
                                 {
-                                   noteStore.folderList.map( (folder) =>  
-                                    <ListItem as={ noteStore.selectedFolder === folder.id? '':'a'}  key={folder.id} onClick={() => noteStore.setSelectedFolder(folder.id)}>
+                                   store.folderList.map( (folder) =>  
+                                    <ListItem as={ store.selectedFolder === folder.id? '':'a'}  key={folder.id} onClick={() => store.setSelectedFolder(folder.id)}>
                                         <ListIcon name='folder' />
                                         <ListContent>
                                         <ListHeader>{folder.name}</ListHeader>
@@ -56,14 +70,16 @@ const Folders  =  observer(() => {
                         </ListContent>
                         </ListItem>
                     </List>
+                    }
                     
                 </CardContent>
             </Card>
             <Button type="button" icon="plus" onClick={openOrCloseForm} ></Button>
             {
-                newfolderFlag &&  <FolderForm openOrCloseForm={openOrCloseForm} />
+                newfolderFlag &&  <FolderForm store={store} openOrCloseForm={openOrCloseForm} />
             }
         </Container>
+        </>
     );
 
 });

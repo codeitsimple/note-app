@@ -11,24 +11,29 @@ import {collection,
     query,
     where,
     setDoc,
-    orderBy
+    orderBy,
+    updateDoc
     } from "firebase/firestore";
 
 export class NotesStore  {
 
+    loading: boolean =  false;
     notes: any[] = [];
     folders:any[] = [];
     selectedFolder = 'default';
-    selectedFolderName = 'Default';
     currentUser = '';
     selectedNote: Note = {
         date:'',
         description: '',
         id: '',
-        title:''
+        title:'',
+        align:'',
+        weight:''
     };
     editing: boolean = false; 
     disposer1;
+
+
     constructor() {
         console.log('Store init ..');
         makeObservable(this, {
@@ -39,19 +44,19 @@ export class NotesStore  {
             createNote: action,
             getNotes: action,
             resetData: action,
+
             setEditing: action,
             selectedNote: observable,
             editing: observable,
-            isEditing: computed,
 
             folders: observable,
             selectedFolder: observable,
             setSelectedFolder: action,
-            selectedFolderName: observable,
 
             createFolder: action,
             getFolders: action,
-            folderList: computed
+            folderList: computed,
+            loading: observable
 
         });
         this.getCurrentUser();
@@ -65,6 +70,8 @@ export class NotesStore  {
     }
 
     public async setCurrentUserSession(user: User){
+
+        this.setCurrentUserCookie(user.id);
 
         const userCollectionRef =  collection(db,'accounts');
         const q = query(userCollectionRef, where("id", "==", user.id));
@@ -82,11 +89,10 @@ export class NotesStore  {
         const fq = query(folderRef, where("name", "==", "default"));
 
         const folderDocs  = await getDocs(fq);
+        
         if(folderDocs.size === 0 ){
             await setDoc( doc(db, `accounts/${this.currentUser}/folders`, 'default' ), {name:'default'});
         }
-
-        this.setCurrentUserCookie(user.id);
 
         this.getFolders();
         this.getNotes();
@@ -104,36 +110,56 @@ export class NotesStore  {
     }
 
     getCurrentUser(){
-        return this.currentUser = Cookies.get('nuid') || '';
+        this.currentUser = Cookies.get('nuid') || '';
+        return this.currentUser;
+    }
+
+    get isUserAuthenticated (){
+        const user  =  Cookies.get('nuid') || '';
+        return user ?true: false; 
     }
 
 
     public createNote(note: Note){
         const notesColletionRef =  collection(db,`accounts/${this.currentUser}/folders/${this.selectedFolder}/notes`);
-        addDoc(notesColletionRef, note);
+        if(note.id)
+        {
+            const documentReference  = doc(db, `accounts/${this.currentUser}/folders/${this.selectedFolder}/notes/${note.id}`);
+            updateDoc(documentReference, note);
+
+        }else{
+            addDoc(notesColletionRef, note);
+        }
+        
+        
         this.getNotes();
     }
 
     public setEditing(note:Note){
         this.editing =  true;
-        this.selectedNote =  note; 
-    }
-
-    get isEditing(){
-        return this.editing;
+        this.selectedNote = Object.assign({}, note); 
     }
 
     public async getNotes(){
         if(!this.currentUser)  return; 
-
+        
         const notesColletionRef =  collection(db,`accounts/${this.currentUser}/folders/${this.selectedFolder}/notes`);
         const data = (await getDocs(notesColletionRef));
         this.notes =  data.docs.map( (doc: any) => {
             return {...doc.data(),id: doc.id};
         });
+        
     }
     public setSelectedFolder(folder: string) {
         this.selectedFolder =  folder; 
+        this.selectedNote = {
+            date:'',
+            description: '',
+            id: '',
+            title:'',
+            align:'',
+            weight:''
+        };
         this.getNotes();
     };
     public async createFolder(folder:Folder){
@@ -148,6 +174,7 @@ export class NotesStore  {
 
     public async getFolders(){
         if(!this.currentUser)  return; 
+        this.loading = true ;
         const folderCollectionRef =  collection(db,`accounts/${this.currentUser}/folders`);
         const q =  query(folderCollectionRef,orderBy("name", "asc"));
         const data = (await getDocs(q));
@@ -155,6 +182,7 @@ export class NotesStore  {
         this.folders =  data.docs.map( (doc: any) => {
             return {...doc.data(),id: doc.id};
         });
+        this.loading = false;
     }
     
     public resetData(){
